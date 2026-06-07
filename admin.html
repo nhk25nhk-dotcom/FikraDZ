@@ -306,7 +306,6 @@ body{
       <button class="filter-btn" data-filter="جديد" onclick="setFilter(this)">جديدة</button>
       <button class="filter-btn" data-filter="قيد المراجعة" onclick="setFilter(this)">قيد المراجعة</button>
       <button class="filter-btn" data-filter="مكتمل" onclick="setFilter(this)">مكتملة</button>
-      <button class="demo-btn" onclick="addDemoData()">+ إضافة بيانات تجريبية</button>
     </div>
 
     <!-- TABLE -->
@@ -383,7 +382,7 @@ async function loadSubmissions() {
 
   submissions = data || [];
 
-  loadSubmissions();
+  renderAll();
 }
 
 function doLogin(){
@@ -430,7 +429,7 @@ function renderTable(){
   if(currentFilter!=='الكل') filtered=filtered.filter(s=>s.status===currentFilter);
   if(q) filtered=filtered.filter(s=>
     s.idea.toLowerCase().includes(q)||
-    s.name.toLowerCase().includes(q)||
+    (s.name || '').toLowerCase().includes(q)||
     (s.email&&s.email.toLowerCase().includes(q))
   );
   const body=document.getElementById('tableBody');
@@ -442,7 +441,9 @@ function renderTable(){
     <div class="sub-row" onclick="openModal(${s.id})">
       <div class="sub-idea">${escHtml(s.idea)}</div>
       <div class="sub-name">${escHtml(s.name)}</div>
-      <div class="sub-date">${escHtml(s.date)}</div>
+      <div class="sub-date">
+        ${new Date(s.created_at).toLocaleDateString('ar-DZ')}
+        </div>
       <div><span class="status-badge s-${s.status.replace(' ','-')}">${s.status}</span></div>
       <div class="action-wrap" onclick="event.stopPropagation()">
         <button class="act-btn" title="عرض" onclick="openModal(${s.id})">👁</button>
@@ -465,8 +466,10 @@ function openModal(id){
   document.getElementById('mIdea').textContent=s.idea;
   document.getElementById('mName').textContent=s.name;
   document.getElementById('mEmail').textContent=s.email||'—';
-  document.getElementById('mDate').textContent=s.date;
-  document.getElementById('mCredit').textContent=s.credit||'—';
+  document.getElementById('mDate').textContent =
+new Date(s.created_at).toLocaleString('ar-DZ');
+  document.getElementById('mCredit').textContent =
+s.credit ? 'نعم' : 'لا';
   document.getElementById('mStatus').value=s.status||'جديد';
   document.getElementById('mNote').value=s.note||'';
   document.getElementById('modalOverlay').classList.add('open');
@@ -531,29 +534,13 @@ async function deleteFromModal(){
   await loadSubmissions();
 }
 
-const DEMO=[
-  {id:1001,date:'2025-06-01 09:14',idea:'واش يمكن تعمل تطبيق يخلينا نتبع الطرود الجزائرية بالوقت الحقيقي؟ البريد الجزائري ما عندوش حاجة زينة.',name:'يوسف بن علي',email:'yousef@gmail.com',credit:'نعم',status:'قيد المراجعة',note:'فكرة ممتازة — نبحث في API البريد'},
-  {id:1002,date:'2025-06-02 11:30',idea:'نتمنى يكون فيه تطبيق لحجز مواعيد EPST بدل ما تقعد تدور على فلوس في الأسواق',name:'مجهول',email:'—',credit:'لا',status:'جديد',note:''},
-  {id:1003,date:'2025-06-03 14:22',idea:'خدمة توصيل الأدوية من الصيدلية للمنزل في الجزائر — خاصة لكبار السن اللي صعيب عليهم الخروج',name:'فاطمة الزهراء',email:'fatimazahra@yahoo.fr',credit:'نعم',status:'جديد',note:''},
-  {id:1004,date:'2025-06-04 08:55',idea:'منصة تجمع كل مسابقات التوظيف في الجزائر في مكان واحد مع إشعارات لما يخرج مسابقة جديدة',name:'عمر حداد',email:'omar.h@outlook.com',credit:'نعم',status:'مكتمل',note:'موضوع مدروس — قريب نبدأ'},
-  {id:1005,date:'2025-06-05 16:10',idea:'تطبيق يساعد الطلاب الجدد في الجامعة يلقاو السكن القريب والمطاعم الطلابية والنقل',name:'مجهول',email:'—',credit:'لا',status:'جديد',note:''}
-];
-
-function addDemoData(){
-  const existing=getSubmissions();
-  const ids=existing.map(s=>s.id);
-  const toAdd=DEMO.filter(d=>!ids.includes(d.id));
-  if(!toAdd.length){alert('البيانات التجريبية موجودة مسبقاً');return;}
-  saveSubmissions([...toAdd,...existing]);
-  loadSubmissions();
-}
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseUrl = "https://kfhnlnhopayrjntvltvv.supabase.co/rest/v1/";
-const supabaseKey = "kfhnlnhopayrjntvltvv";
+const supabaseUrl = "https://kfhnlnhopayrjntvltvv.supabase.co";
+const supabaseKey = "YOUR_PUBLISHABLE_KEY";
 
 const supabase = window.supabase.createClient(
   supabaseUrl,
