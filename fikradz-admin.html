@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FikraDZ — لوحة الإدارة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#FAF8F5;--cream-2:#F3F0EA;--border:#E2DDD4;--border-2:#CEC8BC;
+  --ink:#1A1814;--ink-2:#2D2A24;--ink-3:#4A4640;--muted:#8A8278;--muted-2:#B5B0A8;
+  --green:#1B5E35;--green-mid:#2D7A4F;--green-light:#3A9960;
+  --green-bg:#EDF7F1;--green-pale:#F2FAF5;--green-border:#B8DEC9;
+  --red:#B22222;--red-bg:#FDF0F0;--red-border:#F0C4C4;
+  --gold:#B8963E;--gold-pale:#FDF6E7;
+  --amber:#92660A;--amber-bg:#FEF9EC;--amber-border:#F5DFA0;
+  --shadow:0 2px 16px rgba(26,24,20,0.07);
+  --radius:12px;--radius-sm:8px;
+}
+html{font-size:16px}
+body{
+  background:var(--cream-2);color:var(--ink);
+  font-family:'Tajawal',sans-serif;font-weight:400;line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;
+}
+
+/* LOGIN SCREEN */
+#loginScreen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--cream);
+  background-image:radial-gradient(ellipse 60% 50% at 20% 30%, rgba(27,94,53,0.05) 0%, transparent 70%),
+                   radial-gradient(ellipse 50% 40% at 80% 70%, rgba(178,34,34,0.03) 0%, transparent 70%);
+}
+.login-card{
+  background:#fff;border:1px solid var(--border);border-radius:20px;
+  padding:2.5rem;width:100%;max-width:400px;
+  box-shadow:0 8px 40px rgba(26,24,20,0.1);text-align:center;
+}
+.login-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;margin-bottom:0.25rem}
+.ll-g{color:var(--green)}.ll-dz{color:var(--red)}
+.login-sub{color:var(--muted);font-size:0.875rem;margin-bottom:2rem}
+.login-field{margin-bottom:1rem;text-align:right}
+.login-field label{display:block;font-size:0.82rem;font-weight:700;color:var(--ink-3);margin-bottom:6px}
+.login-field input{
+  width:100%;background:var(--cream);border:1px solid var(--border-2);
+  border-radius:var(--radius-sm);padding:10px 14px;
+  font-family:'Tajawal',sans-serif;font-size:0.95rem;color:var(--ink);
+  outline:none;transition:all .2s;direction:ltr;text-align:left;
+}
+.login-field input:focus{border-color:var(--green-light);box-shadow:0 0 0 3px rgba(27,94,53,0.08)}
+.login-btn{
+  width:100%;background:var(--green);color:#fff;border:none;
+  padding:12px;border-radius:var(--radius-sm);
+  font-family:'Tajawal',sans-serif;font-weight:700;font-size:1rem;
+  cursor:pointer;transition:all .2s;margin-top:0.5rem;
+}
+.login-btn:hover{background:var(--green-mid)}
+.login-err{color:var(--red);font-size:0.82rem;margin-top:8px;display:none}
+
+/* MAIN ADMIN LAYOUT */
+#adminApp{display:none}
+.admin-header{
+  background:#fff;border-bottom:1px solid var(--border);
+  padding:0 5vw;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+}
+.admin-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem}
+.admin-logo .al-g{color:var(--green)}.admin-logo .al-dz{color:var(--red)}
+.admin-logo-sub{font-size:0.75rem;color:var(--muted);font-family:'Tajawal',sans-serif;font-weight:400;margin-right:8px}
+.logout-btn{
+  background:none;border:1px solid var(--border-2);color:var(--muted);
+  padding:6px 14px;border-radius:6px;font-family:'Tajawal',sans-serif;
+  font-size:0.82rem;cursor:pointer;transition:all .2s;
+}
+.logout-btn:hover{border-color:var(--red-border);color:var(--red)}
+
+.admin-body{padding:2rem 5vw;max-width:1100px;margin:0 auto}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:2rem}
+.stat-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.25rem;text-align:center;
+}
+.stat-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;line-height:1;margin-bottom:4px}
+.stat-label{font-size:0.8rem;color:var(--muted);font-weight:500}
+.s-total .stat-num{color:var(--ink)}
+.s-new .stat-num{color:var(--green)}
+.s-review .stat-num{color:var(--amber)}
+.s-done .stat-num{color:var(--muted)}
+
+/* TOOLBAR */
+.toolbar{
+  display:flex;align-items:center;gap:12px;margin-bottom:1.25rem;flex-wrap:wrap;
+}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-input{
+  width:100%;background:#fff;border:1px solid var(--border-2);
+  border-radius:var(--radius-sm);padding:9px 14px 9px 36px;
+  font-family:'Tajawal',sans-serif;font-size:0.9rem;color:var(--ink);
+  outline:none;transition:border-color .2s;direction:rtl;
+}
+.search-input:focus{border-color:var(--green-light)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted-2);font-size:0.9rem;pointer-events:none}
+.filter-btn{
+  background:#fff;border:1px solid var(--border-2);color:var(--ink-3);
+  padding:9px 16px;border-radius:var(--radius-sm);
+  font-family:'Tajawal',sans-serif;font-size:0.85rem;font-weight:500;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.filter-btn:hover{border-color:var(--green-border);color:var(--green)}
+.filter-btn.active{background:var(--green-pale);border-color:var(--green-light);color:var(--green);font-weight:700}
+
+/* SUBMISSIONS TABLE */
+.table-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-head{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 110px 100px;
+  gap:0;background:var(--cream-2);
+  border-bottom:1px solid var(--border);
+  padding:10px 20px;
+}
+.th{font-size:0.78rem;font-weight:700;color:var(--muted);letter-spacing:0.5px}
+
+.sub-row{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 110px 100px;
+  gap:0;padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  align-items:center;cursor:pointer;transition:background .15s;
+}
+.sub-row:last-child{border-bottom:none}
+.sub-row:hover{background:var(--cream)}
+.sub-idea{
+  font-size:0.9rem;color:var(--ink);line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  padding-left:16px;
+}
+.sub-name{font-size:0.875rem;color:var(--ink-3)}
+.sub-date{font-size:0.8rem;color:var(--muted)}
+.status-badge{
+  display:inline-flex;align-items:center;
+  padding:4px 10px;border-radius:100px;
+  font-size:0.75rem;font-weight:700;
+}
+.s-جديد{background:var(--green-pale);color:var(--green);border:1px solid var(--green-border)}
+.s-قيد-المراجعة{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.s-مكتمل{background:var(--cream-2);color:var(--muted);border:1px solid var(--border)}
+.s-مؤجل{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+
+.action-wrap{display:flex;gap:6px}
+.act-btn{
+  background:none;border:1px solid var(--border);color:var(--muted);
+  width:30px;height:30px;border-radius:6px;
+  font-size:0.9rem;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;
+}
+.act-btn:hover{border-color:var(--green-border);color:var(--green);background:var(--green-pale)}
+.act-del:hover{border-color:var(--red-border);color:var(--red);background:var(--red-bg)}
+
+.empty-state{
+  text-align:center;padding:4rem 2rem;color:var(--muted);
+}
+.empty-state .e-icon{font-size:2.5rem;margin-bottom:0.75rem;opacity:0.4}
+.empty-state p{font-size:0.95rem}
+
+/* MODAL */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(26,24,20,0.45);z-index:200;
+  align-items:center;justify-content:center;
+  padding:1.5rem;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:#fff;border-radius:20px;
+  width:100%;max-width:580px;
+  max-height:85vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-header{
+  padding:1.5rem 1.75rem 1rem;
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.modal-header h3{font-size:1rem;font-weight:700}
+.modal-close{
+  background:none;border:none;font-size:1.25rem;
+  color:var(--muted);cursor:pointer;padding:4px;line-height:1;
+}
+.modal-close:hover{color:var(--ink)}
+.modal-body{padding:1.75rem}
+.modal-idea{
+  background:var(--cream);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:1rem;
+  font-size:0.95rem;line-height:1.8;color:var(--ink);
+  margin-bottom:1.25rem;
+}
+.modal-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.meta-item{background:var(--cream-2);border-radius:var(--radius-sm);padding:10px 14px}
+.meta-label{font-size:0.75rem;color:var(--muted);font-weight:700;margin-bottom:2px}
+.meta-val{font-size:0.9rem;color:var(--ink-3);font-weight:500}
+.modal-status{margin-bottom:1rem}
+.modal-status label{font-size:0.82rem;font-weight:700;color:var(--ink-3);display:block;margin-bottom:6px}
+.status-select{
+  width:100%;background:var(--cream);border:1px solid var(--border-2);
+  border-radius:var(--radius-sm);padding:9px 12px;
+  font-family:'Tajawal',sans-serif;font-size:0.9rem;color:var(--ink);
+  outline:none;cursor:pointer;
+}
+.status-select:focus{border-color:var(--green-light)}
+.modal-note{margin-bottom:1rem}
+.modal-note label{font-size:0.82rem;font-weight:700;color:var(--ink-3);display:block;margin-bottom:6px}
+.modal-note textarea{
+  width:100%;background:var(--cream);border:1px solid var(--border-2);
+  border-radius:var(--radius-sm);padding:9px 12px;
+  font-family:'Tajawal',sans-serif;font-size:0.875rem;color:var(--ink);
+  outline:none;resize:vertical;min-height:80px;line-height:1.6;
+}
+.modal-note textarea:focus{border-color:var(--green-light)}
+.modal-actions{display:flex;gap:10px;padding-top:4px}
+.save-btn{
+  flex:1;background:var(--green);color:#fff;border:none;
+  padding:11px;border-radius:var(--radius-sm);
+  font-family:'Tajawal',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all .2s;
+}
+.save-btn:hover{background:var(--green-mid)}
+.del-modal-btn{
+  background:none;border:1px solid var(--red-border);color:var(--red);
+  padding:11px 16px;border-radius:var(--radius-sm);
+  font-family:'Tajawal',sans-serif;font-weight:600;font-size:0.875rem;cursor:pointer;transition:all .2s;
+}
+.del-modal-btn:hover{background:var(--red-bg)}
+
+/* ADD DEMO BTN */
+.demo-btn{
+  background:none;border:1px dashed var(--green-border);color:var(--green-mid);
+  padding:9px 16px;border-radius:var(--radius-sm);
+  font-family:'Tajawal',sans-serif;font-size:0.85rem;font-weight:600;
+  cursor:pointer;transition:all .2s;
+}
+.demo-btn:hover{background:var(--green-pale)}
+
+@media(max-width:700px){
+  .table-head{display:none}
+  .sub-row{grid-template-columns:1fr;gap:6px;padding:14px 16px}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .modal-meta{grid-template-columns:1fr}
+  .toolbar{gap:8px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo"><span class="ll-g">Fikra</span><span class="ll-dz">DZ</span></div>
+    <p class="login-sub">لوحة الإدارة — دخول خاص</p>
+    <div class="login-field">
+      <label>اسم المستخدم</label>
+      <input type="text" id="loginUser" placeholder="admin" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>كلمة المرور</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">دخول</button>
+    <p class="login-err" id="loginErr">اسم المستخدم أو كلمة المرور غير صحيحة</p>
+    <p style="font-size:0.75rem;color:var(--muted-2);margin-top:1.25rem">المستخدم: <b>admin</b> — كلمة المرور: <b>fikra2025</b></p>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp">
+
+  <header class="admin-header">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="admin-logo"><span class="al-g">Fikra</span><span class="al-dz">DZ</span></div>
+      <span class="admin-logo-sub">/ لوحة الإدارة</span>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">تسجيل الخروج</button>
+  </header>
+
+  <main class="admin-body">
+
+    <!-- STATS -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card s-total"><div class="stat-num" id="stTotal">0</div><div class="stat-label">إجمالي الاقتراحات</div></div>
+      <div class="stat-card s-new"><div class="stat-num" id="stNew">0</div><div class="stat-label">جديدة</div></div>
+      <div class="stat-card s-review"><div class="stat-num" id="stReview">0</div><div class="stat-label">قيد المراجعة</div></div>
+      <div class="stat-card s-done"><div class="stat-num" id="stDone">0</div><div class="stat-label">مكتملة</div></div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" type="text" id="searchInput" placeholder="ابحث في الاقتراحات…" oninput="renderTable()">
+      </div>
+      <button class="filter-btn active" data-filter="الكل" onclick="setFilter(this)">الكل</button>
+      <button class="filter-btn" data-filter="جديد" onclick="setFilter(this)">جديدة</button>
+      <button class="filter-btn" data-filter="قيد المراجعة" onclick="setFilter(this)">قيد المراجعة</button>
+      <button class="filter-btn" data-filter="مكتمل" onclick="setFilter(this)">مكتملة</button>
+      <button class="demo-btn" onclick="addDemoData()">+ إضافة بيانات تجريبية</button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <div class="table-head">
+        <div class="th">الاقتراح</div>
+        <div class="th">المُرسِل</div>
+        <div class="th">التاريخ</div>
+        <div class="th">الحالة</div>
+        <div class="th">إجراءات</div>
+      </div>
+      <div id="tableBody"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <h3>تفاصيل الاقتراح</h3>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-idea" id="mIdea"></div>
+      <div class="modal-meta">
+        <div class="meta-item"><div class="meta-label">المُرسِل</div><div class="meta-val" id="mName"></div></div>
+        <div class="meta-item"><div class="meta-label">البريد الإلكتروني</div><div class="meta-val" id="mEmail" style="direction:ltr;text-align:right"></div></div>
+        <div class="meta-item"><div class="meta-label">التاريخ</div><div class="meta-val" id="mDate"></div></div>
+        <div class="meta-item"><div class="meta-label">ذكر الاسم في المشروع؟</div><div class="meta-val" id="mCredit"></div></div>
+      </div>
+      <div class="modal-status">
+        <label>الحالة</label>
+        <select class="status-select" id="mStatus">
+          <option>جديد</option>
+          <option>قيد المراجعة</option>
+          <option>مكتمل</option>
+          <option>مؤجل</option>
+        </select>
+      </div>
+      <div class="modal-note">
+        <label>ملاحظات داخلية</label>
+        <textarea id="mNote" placeholder="ملاحظات الفريق حول هذا الاقتراح…"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="save-btn" onclick="saveModal()">حفظ التغييرات</button>
+        <button class="del-modal-btn" onclick="deleteFromModal()">حذف</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const ADMIN_USER='admin';
+const ADMIN_PASS='fikra2025';
+let currentFilter='الكل';
+let activeId=null;
+
+let submissions = [];
+
+async function loadSubmissions() {
+
+  const { data, error } = await supabase
+    .from('ideas')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  submissions = data || [];
+
+  loadSubmissions();
+}
+
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(u===ADMIN_USER&&p===ADMIN_PASS){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminApp').style.display='block';
+    loadSubmissions();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+  }
+}
+function doLogout(){
+  document.getElementById('adminApp').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginPass').value='';
+}
+
+function setFilter(btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter=btn.dataset.filter;
+  renderTable();
+}
+
+function renderAll(){
+  renderStats();
+  renderTable();
+}
+
+function renderStats(){
+  const list=submissions;
+  document.getElementById('stTotal').textContent=list.length;
+  document.getElementById('stNew').textContent=list.filter(s=>s.status==='جديد').length;
+  document.getElementById('stReview').textContent=list.filter(s=>s.status==='قيد المراجعة').length;
+  document.getElementById('stDone').textContent=list.filter(s=>s.status==='مكتمل').length;
+}
+
+function renderTable(){
+  const list=submissions;
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  let filtered=list;
+  if(currentFilter!=='الكل') filtered=filtered.filter(s=>s.status===currentFilter);
+  if(q) filtered=filtered.filter(s=>
+    s.idea.toLowerCase().includes(q)||
+    s.name.toLowerCase().includes(q)||
+    (s.email&&s.email.toLowerCase().includes(q))
+  );
+  const body=document.getElementById('tableBody');
+  if(!filtered.length){
+    body.innerHTML=`<div class="empty-state"><div class="e-icon">📭</div><p>ما فيش اقتراحات للعرض</p></div>`;
+    return;
+  }
+  body.innerHTML=filtered.map(s=>`
+    <div class="sub-row" onclick="openModal(${s.id})">
+      <div class="sub-idea">${escHtml(s.idea)}</div>
+      <div class="sub-name">${escHtml(s.name)}</div>
+      <div class="sub-date">${escHtml(s.date)}</div>
+      <div><span class="status-badge s-${s.status.replace(' ','-')}">${s.status}</span></div>
+      <div class="action-wrap" onclick="event.stopPropagation()">
+        <button class="act-btn" title="عرض" onclick="openModal(${s.id})">👁</button>
+        <button class="act-btn act-del" title="حذف" onclick="deleteById(${s.id})">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escHtml(t){
+  if(!t)return'';
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function openModal(id){
+  const list=submissions;
+  const s=list.find(x=>x.id===id);
+  if(!s)return;
+  activeId=id;
+  document.getElementById('mIdea').textContent=s.idea;
+  document.getElementById('mName').textContent=s.name;
+  document.getElementById('mEmail').textContent=s.email||'—';
+  document.getElementById('mDate').textContent=s.date;
+  document.getElementById('mCredit').textContent=s.credit||'—';
+  document.getElementById('mStatus').value=s.status||'جديد';
+  document.getElementById('mNote').value=s.note||'';
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(e){if(e.target===document.getElementById('modalOverlay'))closeModalDirect()}
+function closeModalDirect(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+  activeId=null;
+}
+
+async function saveModal(){
+
+  if(!activeId) return;
+
+  const { error } = await supabase
+    .from('ideas')
+    .update({
+      status: document.getElementById('mStatus').value,
+      note: document.getElementById('mNote').value
+    })
+    .eq('id', activeId);
+
+  if(error){
+    alert("خطأ في الحفظ");
+    return;
+  }
+
+  closeModalDirect();
+
+  await loadSubmissions();
+}
+
+async function deleteById(id){
+
+  if(!confirm('هل تريد حذف هذا الاقتراح؟'))
+    return;
+
+  await supabase
+    .from('ideas')
+    .delete()
+    .eq('id', id);
+
+  await loadSubmissions();
+}
+
+async function deleteFromModal(){
+
+  if(!activeId) return;
+
+  if(!confirm('هل تريد حذف هذا الاقتراح؟'))
+    return;
+
+  await supabase
+    .from('ideas')
+    .delete()
+    .eq('id', activeId);
+
+  closeModalDirect();
+
+  await loadSubmissions();
+}
+
+const DEMO=[
+  {id:1001,date:'2025-06-01 09:14',idea:'واش يمكن تعمل تطبيق يخلينا نتبع الطرود الجزائرية بالوقت الحقيقي؟ البريد الجزائري ما عندوش حاجة زينة.',name:'يوسف بن علي',email:'yousef@gmail.com',credit:'نعم',status:'قيد المراجعة',note:'فكرة ممتازة — نبحث في API البريد'},
+  {id:1002,date:'2025-06-02 11:30',idea:'نتمنى يكون فيه تطبيق لحجز مواعيد EPST بدل ما تقعد تدور على فلوس في الأسواق',name:'مجهول',email:'—',credit:'لا',status:'جديد',note:''},
+  {id:1003,date:'2025-06-03 14:22',idea:'خدمة توصيل الأدوية من الصيدلية للمنزل في الجزائر — خاصة لكبار السن اللي صعيب عليهم الخروج',name:'فاطمة الزهراء',email:'fatimazahra@yahoo.fr',credit:'نعم',status:'جديد',note:''},
+  {id:1004,date:'2025-06-04 08:55',idea:'منصة تجمع كل مسابقات التوظيف في الجزائر في مكان واحد مع إشعارات لما يخرج مسابقة جديدة',name:'عمر حداد',email:'omar.h@outlook.com',credit:'نعم',status:'مكتمل',note:'موضوع مدروس — قريب نبدأ'},
+  {id:1005,date:'2025-06-05 16:10',idea:'تطبيق يساعد الطلاب الجدد في الجامعة يلقاو السكن القريب والمطاعم الطلابية والنقل',name:'مجهول',email:'—',credit:'لا',status:'جديد',note:''}
+];
+
+function addDemoData(){
+  const existing=getSubmissions();
+  const ids=existing.map(s=>s.id);
+  const toAdd=DEMO.filter(d=>!ids.includes(d.id));
+  if(!toAdd.length){alert('البيانات التجريبية موجودة مسبقاً');return;}
+  saveSubmissions([...toAdd,...existing]);
+  loadSubmissions();
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+const supabaseUrl = "https://kfhnlnhopayrjntvltvv.supabase.co/rest/v1/";
+const supabaseKey = "kfhnlnhopayrjntvltvv";
+
+const supabase = window.supabase.createClient(
+  supabaseUrl,
+  supabaseKey
+);
+</script>
+</body>
+</html>
